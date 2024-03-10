@@ -12,7 +12,7 @@ class Plot:
         self.plot = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=0, column=1)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=8)
         self.line = None  # Przechowuje obiekt linii wykresu
 
     def update_Plot(self, time, signal, start_time, end_time, title, xlabel, ylabel):
@@ -24,7 +24,6 @@ class Plot:
         self.plot.set_title(title)
         self.plot.set_xlabel(xlabel)
         self.plot.set_ylabel(ylabel)
-        self.plot.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), fancybox=True, shadow=True, ncol=2)
         self.plot.grid(True)
         self.canvas.draw()
         self.line = self.plot.lines[0]  # Zapisuje referencję do nowej linii wykresu
@@ -44,6 +43,10 @@ class App:
         def loadFile():
             self.path = filedialog.askopenfilename(initialdir="/", title="Select EKG signal file",
                                                    filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
+            # Aktywacja inputów po wczytaniu pliku
+            self.frequency_entry.config(state='normal')
+            self.start_time_entry.config(state='normal')
+            self.end_time_entry.config(state='normal')
 
         # Showing EKG signal plot
         def show_plot():
@@ -56,28 +59,27 @@ class App:
 
         # Buttons
         loadFile_button = Button(master, text="Load File", command=loadFile)
-        loadFile_button.grid(row=0, column=0)
+        loadFile_button.grid(row=0, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         frequency_label = Label(master, text="Frequency [Hz]:")
-        frequency_label.grid(row=1, column=0)
-        self.frequency_entry = Entry(master)
-        self.frequency_entry.grid(row=2, column=0)
+        frequency_label.grid(row=1, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.frequency_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
+        self.frequency_entry.grid(row=2, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         start_time_label = Label(master, text="Start Time [s]:")
-        start_time_label.grid(row=3, column=0)
-        self.start_time_entry = Entry(master)
-        self.start_time_entry.grid(row=4, column=0)
+        start_time_label.grid(row=3, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.start_time_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
+        self.start_time_entry.grid(row=4, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         end_time_label = Label(master, text="End Time [s]:")
-        end_time_label.grid(row=5, column=0)
-        self.end_time_entry = Entry(master)
-        self.end_time_entry.grid(row=6, column=0)
+        end_time_label.grid(row=5, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.end_time_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
+        self.end_time_entry.grid(row=6, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         self.plot_signal = Plot(master)
 
-        self.showEKG_button = Button(master, text="Show EKG", command=show_plot)
-        self.showEKG_button.grid(row=7, column=0)
-        self.showEKG_button.config(state='disabled')
+        self.showEKG_button = Button(master, text="Show EKG", command=show_plot, state='disabled')  # Ustawienie jako niedostępny
+        self.showEKG_button.grid(row=7, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         # Sprawdzenie pól tekstowych i ustawienie stanu przycisku
         def check_entries(*args):
@@ -92,5 +94,6 @@ class App:
 
 if __name__ == '__main__':
     root = Tk()
+    root.geometry("1200x625")  # Ustawienie rozmiaru okna
     app = App(root)
     root.mainloop()
