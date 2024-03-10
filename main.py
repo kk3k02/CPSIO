@@ -38,6 +38,7 @@ class App:
         self.start_time_entry = None
         self.end_time_entry = None
         self.showEKG_button = None
+        self.save_button = None  # Przycisk zapisu do pliku
 
         # Loading EKG signal from *.txt file
         def loadFile():
@@ -56,30 +57,49 @@ class App:
             file = File(self.path, frequency=frequency)
             time, signal_data = file.load_EKG()
             app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", "Time [s]", "Amplitude")
+            self.save_button.config(state='normal')  # Aktywacja przycisku "Save to File" po wyświetleniu wykresu
+
+        # Saving plot to file
+        def save_plot():
+            # Pobranie nazwy pliku i formatu zapisu za pomocą okna dialogowego
+            file_path = filedialog.asksaveasfilename(defaultextension=".png",
+                                                     filetypes=[("PNG files", "*.png"),
+                                                                ("JPEG files", "*.jpg"),
+                                                                ("PDF files", "*.pdf")])
+            if file_path:  # Jeśli użytkownik wybrał plik do zapisu
+                try:
+                    # Zapisanie aktualnego wykresu do wybranego pliku i formacie
+                    app.plot_signal.fig.savefig(file_path)
+                    print("Plot saved successfully.")
+                except Exception as e:
+                    print("Error while saving plot:", e)
 
         # Buttons
         loadFile_button = Button(master, text="Load File", command=loadFile)
-        loadFile_button.grid(row=0, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        loadFile_button.grid(row=0, column=0, padx=10, pady=(5, 0))  # Bez zmian w ustawieniach grid
 
         frequency_label = Label(master, text="Frequency [Hz]:")
-        frequency_label.grid(row=1, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        frequency_label.grid(row=1, column=0, padx=10, pady=(5, 0))  # Bez zmian w ustawieniach grid
         self.frequency_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
-        self.frequency_entry.grid(row=2, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.frequency_entry.grid(row=2, column=0, padx=10, pady=(5, 0))  # Bez zmian w ustawieniach grid
 
         start_time_label = Label(master, text="Start Time [s]:")
-        start_time_label.grid(row=3, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        start_time_label.grid(row=3, column=0, padx=10, pady=0)  # Bez zmian w ustawieniach grid
         self.start_time_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
-        self.start_time_entry.grid(row=4, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.start_time_entry.grid(row=4, column=0, padx=10, pady=(5, 0))  # Bez zmian w ustawieniach grid
 
         end_time_label = Label(master, text="End Time [s]:")
-        end_time_label.grid(row=5, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        end_time_label.grid(row=5, column=0, padx=10, pady=0)  # Bez zmian w ustawieniach grid
         self.end_time_entry = Entry(master, state='disabled')  # Ustawienie inputa jako niedostępny
-        self.end_time_entry.grid(row=6, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.end_time_entry.grid(row=6, column=0, padx=10, pady=(5, 0))  # Bez zmian w ustawieniach grid
+
+        self.save_button = Button(master, text="Save to File", command=save_plot, state='disabled')  # Przycisk zapisu do pliku
+        self.save_button.grid(row=7, column=0, padx=10, pady=(5, 0))
 
         self.plot_signal = Plot(master)
 
         self.showEKG_button = Button(master, text="Show EKG", command=show_plot, state='disabled')  # Ustawienie jako niedostępny
-        self.showEKG_button.grid(row=7, column=0, padx=10)  # Bez zmian w ustawieniach grid
+        self.showEKG_button.grid(row=8, column=0, padx=10)  # Bez zmian w ustawieniach grid
 
         # Sprawdzenie pól tekstowych i ustawienie stanu przycisku
         def check_entries(*args):
@@ -94,6 +114,6 @@ class App:
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("1200x625")  # Ustawienie rozmiaru okna
+    root.geometry("1200x650")  # Ustawienie rozmiaru okna
     app = App(root)
     root.mainloop()
