@@ -82,7 +82,7 @@ class App:
                     print("Error while saving plot:", e)
 
         # Load file button
-        loadFile_button = Button(master, text="Load File", command=loadFile)
+        loadFile_button = Button(master, text="Load File", command=loadFile, bg='red')
         loadFile_button.grid(row=0, column=0, padx=10, pady=(5, 0))
 
         # Frequency label/entry
@@ -113,7 +113,7 @@ class App:
 
         # Show EKG button
         self.showEKG_button = Button(master, text="Show EKG", command=show_plot,
-                                     state='disabled')
+                                     state='disabled', bg='yellow')
         self.showEKG_button.grid(row=8, column=0, padx=10)
 
         # Label/entry X
@@ -142,5 +142,6 @@ class App:
 if __name__ == '__main__':
     root = Tk()
     root.geometry("1300x650")
+    root.configure(bg='white')
     app = App(root)
     root.mainloop()
