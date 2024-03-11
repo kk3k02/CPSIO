@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import filedialog
+import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from readFile import File
+from scipy.fft import fft
 
 
 class Plot:
@@ -28,6 +30,18 @@ class Plot:
         self.canvas.draw()
         self.line = self.plot.lines[0]
 
+    def show_frequency_analysis(self, signal, frequency):
+        self.plot.clear()
+        N = len(signal)
+        T = 1 / frequency
+        xf = np.linspace(0.0, 1.0 / (2.0 * T), N // 2)
+        yf = fft(signal)
+        self.plot.plot(xf, 2.0 / N * np.abs(yf[:N // 2]))
+        self.plot.set_title("Frequency Analysis")
+        self.plot.set_xlabel("Frequency [Hz]")
+        self.plot.set_ylabel("Amplitude")
+        self.canvas.draw()
+
 
 class App:
     def __init__(self, master):
@@ -43,6 +57,8 @@ class App:
         self.label_y = ""
         self.label_x_entry = None
         self.label_y_entry = None
+        self.fq_status = BooleanVar()
+        self.fq_anal_c = None
 
         # Loading EKG signal from *.txt file
         def loadFile():
@@ -57,15 +73,21 @@ class App:
 
         # Showing EKG signal plot
         def show_plot():
-            frequency = float(self.frequency_entry.get())
-            start_time = float(self.start_time_entry.get())
-            end_time = float(self.end_time_entry.get())
-            self.label_x = self.label_x_entry.get()  # Pobierz wartość z pola tekstowego dla osi X
-            self.label_y = self.label_y_entry.get()  # Pobierz wartość z pola tekstowego dla osi Y
-            file = File(self.path, frequency=frequency)
+            frequency = float(app.frequency_entry.get())
+            start_time = float(app.start_time_entry.get())
+            end_time = float(app.end_time_entry.get())
+            label_x = app.label_x_entry.get()
+            label_y = app.label_y_entry.get()
+            file = File(app.path, frequency=frequency)
             time, signal_data = file.load_EKG()
-            app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", self.label_x, self.label_y)
-            self.save_button.config(state='normal')  # Activate save button after showing a plot
+
+            if app.fq_status.get():
+                app.plot_signal.show_frequency_analysis(signal_data, frequency)
+            else:
+                app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", label_x, label_y)
+
+            app.save_button.config(state='normal')  # Activate save button after showing a plot
+            self.fq_anal_c.config(state='normal')
 
         # Saving plot to file
         def save_plot():
@@ -127,6 +149,11 @@ class App:
         label_y.grid(row=2, column=2, padx=10)
         self.label_y_entry = Entry(master, state='disabled')
         self.label_y_entry.grid(row=3, column=2, padx=10)
+
+        # Frequency analise
+        self.fq_anal_c = Checkbutton(master, text='Frequency analise', variable=self.fq_status, onvalue=True,
+                                     offvalue=False, state='disabled')
+        self.fq_anal_c.grid(row=4, column=2, padx=10)
 
         # Checking inputs and setting buttons accessibility
         def check_entries(*args):
