@@ -1,10 +1,13 @@
 from tkinter import *
 from tkinter import filedialog
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from readFile import File
 from scipy.fft import fft
+from scipy.fft import fftfreq
+from scipy.fft import ifft
 
 
 class Plot:
@@ -14,7 +17,7 @@ class Plot:
         self.plot = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=8)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=12)
         self.line = None
 
     def update_Plot(self, time, signal, start_time, end_time, title, xlabel, ylabel):
@@ -44,6 +47,7 @@ class Plot:
 
 
 class App:
+    time, signal, length = 0, 0, 0
     def __init__(self, master):
         self.master = master
         self.master.title('CPSIO EKG')
@@ -52,6 +56,10 @@ class App:
         self.start_time_entry = None
         self.end_time_entry = None
         self.showEKG_button = None
+        self.showSin_button = None
+        self.show2Sin_button = None
+        self.fft_button = None
+        self.ifft_button = None
         self.save_button = None
         self.label_x = ""
         self.label_y = ""
@@ -79,15 +87,106 @@ class App:
             label_x = app.label_x_entry.get()
             label_y = app.label_y_entry.get()
             file = File(app.path, frequency=frequency)
-            time, signal_data = file.load_EKG()
+            App.time, App.signal = file.load_EKG()
+            App.length = file.get_length()
 
             if app.fq_status.get():
-                app.plot_signal.show_frequency_analysis(signal_data, frequency)
+                app.plot_signal.show_frequency_analysis(App.signal, frequency)
             else:
-                app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", label_x, label_y)
+                app.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, "EKG SIGNAL", label_x, label_y)
 
-            app.save_button.config(state='normal')  # Activate save button after showing a plot
             self.fq_anal_c.config(state='normal')
+
+        def show_sin_plot():
+            start_time = float(app.start_time_entry.get())
+            end_time = float(app.end_time_entry.get())
+            self.label_x = self.label_x_entry.get()  # Pobierz wartość z pola tekstowego dla osi X
+            self.label_y = self.label_y_entry.get()  # Pobierz wartość z pola tekstowego dla osi Y
+           
+            # Parametry fali sinusoidalnej
+            czestotliwosc = 50  # Hz
+            App.length = 65536  # liczba próbek
+            czas_trwania = float(app.end_time_entry.get())-float(app.start_time_entry.get())
+            czas_probkowania = czas_trwania / App.length
+            # Tworzenie wektora czasu
+            App.time = np.arange(0, czas_trwania, czas_probkowania)        
+            # Generowanie fali sinusoidalnej
+            App.signal = np.sin(2 * np.pi * czestotliwosc * App.time)
+
+            app.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, "SIN SIGNAL", self.label_x, self.label_y)
+
+        def show_2sin_plot():
+            start_time = 0
+            end_time = 0.5
+            self.label_x = self.label_x_entry.get()  # Pobierz wartość z pola tekstowego dla osi X
+            self.label_y = self.label_y_entry.get()  # Pobierz wartość z pola tekstowego dla osi Y
+           
+            # Parametry fal sinusoidalnych
+            czestotliwosc1 = 50  # Hz
+            czestotliwosc2 = 60  # Hz
+            App.length = 65536  # liczba próbek
+            czas_trwania = float(app.end_time_entry.get())-float(app.start_time_entry.get())
+            czas_probkowania = czas_trwania / App.length
+            # Tworzenie wektora czasu
+            App.time = np.arange(0, czas_trwania, czas_probkowania)
+            # Generowanie fali sinusoidalnej dla pierwszej częstotliwości
+            fala_sinusoidalna1 = np.sin(2 * np.pi * czestotliwosc1 * App.time)
+            # Generowanie fali sinusoidalnej dla drugiej częstotliwości
+            fala_sinusoidalna2 = np.sin(2 * np.pi * czestotliwosc2 * App.time)
+            # Mieszanie fal sinusoidalnych
+            App.signal = fala_sinusoidalna1 + fala_sinusoidalna2
+
+            app.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, "SIN SIGNAL", self.label_x, self.label_y)
+
+
+        def do_fft():
+            # Obliczenie dyskretnej transformaty Fouriera
+            Fft = fft(App.signal)
+            # Obliczenie widma amplitudowego 
+            widmo = np.abs(Fft)
+            
+            czas_trwania = 10#float(app.end_time_entry.get())-float(app.start_time_entry.get())
+            czas_probkowania = czas_trwania / App.length
+            
+            # Wyznaczanie osi częstotliwości
+            czestotliwosci = fftfreq(App.length,czas_probkowania)
+            indeksy = np.where(czestotliwosci >= 0)
+            czestotliwosci = czestotliwosci[indeksy]
+            widmo = widmo[indeksy]
+            
+            plt.plot(czestotliwosci, widmo)
+            plt.title('Widmo Amplitudowe')
+            plt.xlabel('Częstotliwość [Hz]')
+            plt.ylabel('Amplituda')
+            plt.show()
+            
+            
+        def do_ifft():
+            start_time = float(app.start_time_entry.get())
+            end_time = float(app.end_time_entry.get())
+            # Obliczenie dyskretnej transformaty Fouriera
+            Fft = fft(App.signal)
+            # Obliczenie widma amplitudowego 
+            widmo = np.abs(Fft)
+            
+            czas_trwania = 10#float(app.end_time_entry.get())-float(app.start_time_entry.get())
+            czas_probkowania = czas_trwania / App.length
+            
+            # Wyznaczanie osi częstotliwości
+            czestotliwosci = fftfreq(App.length,czas_probkowania)
+            indeksy = np.where(czestotliwosci >= 0)
+            czestotliwosci = czestotliwosci[indeksy]
+            widmo = widmo[indeksy]
+            
+            odwrotna_fft = ifft(Fft)
+            
+            plt.plot(App.time, odwrotna_fft.real)  # Realna część odwrotnej FFT
+            plt.title('Sygnał po odwrotnej FFT')
+            plt.xlabel('Czas [s]')
+            plt.ylabel('Amplituda')
+            plt.grid(True)
+            plt.xlim(start_time,end_time)
+            plt.show()
 
         # Saving plot to file
         def save_plot():
@@ -110,24 +209,24 @@ class App:
         # Frequency label/entry
         frequency_label = Label(master, text="Frequency [Hz]:")
         frequency_label.grid(row=1, column=0, padx=10, pady=(5, 0))
-        self.frequency_entry = Entry(master, state='disabled')
+        self.frequency_entry = Entry(master, state='normal')
         self.frequency_entry.grid(row=2, column=0, padx=10, pady=(5, 0))
 
         # Start time label/entry
         start_time_label = Label(master, text="Start Time [s]:")
         start_time_label.grid(row=3, column=0, padx=10, pady=0)
-        self.start_time_entry = Entry(master, state='disabled')
+        self.start_time_entry = Entry(master, state='normal')
         self.start_time_entry.grid(row=4, column=0, padx=10, pady=(5, 0))
 
         # End time label/entry
         end_time_label = Label(master, text="End Time [s]:")
         end_time_label.grid(row=5, column=0, padx=10, pady=0)
-        self.end_time_entry = Entry(master, state='disabled')
+        self.end_time_entry = Entry(master, state='normal')
         self.end_time_entry.grid(row=6, column=0, padx=10, pady=(5, 0))
 
         # Save to file button
         self.save_button = Button(master, text="Save to File", command=save_plot,
-                                  state='disabled')
+                                  state='normal')
         self.save_button.grid(row=7, column=0, padx=10, pady=(5, 0))
 
         # Plot
@@ -135,8 +234,24 @@ class App:
 
         # Show EKG button
         self.showEKG_button = Button(master, text="Show EKG", command=show_plot,
-                                     state='disabled', bg='yellow')
+                                     state='normal', bg='yellow')
         self.showEKG_button.grid(row=8, column=0, padx=10)
+
+        # Show Sin button
+        self.showSin_button = Button(master, text="Load Sin", command=show_sin_plot, 
+                                     state='normal', bg='red')
+        self.showSin_button.grid(row=9, column=0, padx=10)
+
+        # Show 2Sin button
+        self.show2Sin_button = Button(master, text="Load 2 Sin", command=show_2sin_plot, 
+                                     state='normal', bg='red')
+        self.show2Sin_button.grid(row=10, column=0, padx=10)
+        
+        self.fft_button = Button(master, text='FFT', command=do_fft, state='normal', bg='green')
+        self.fft_button.grid(row=11, column=0, padx=10)
+        
+        self.ifft_button = Button(master, text='IFFT', command=do_ifft, state='normal', bg='green')
+        self.ifft_button.grid(row=12, column=0, padx=10)
 
         # Label/entry X
         label_x = Label(master, text="Label X:")

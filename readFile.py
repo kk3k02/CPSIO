@@ -21,3 +21,12 @@ class File:
             signal = data
 
         return time, signal
+    
+    def get_length(self):
+        with open(self.path) as f:
+            line_count = 0
+            for line in f:
+                line_count += 1
+                
+        return line_count
+        
