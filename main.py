@@ -79,7 +79,7 @@ class App:
 
         # Loading EKG signal from *.txt file
         def loadFile():
-            self.path = filedialog.askopenfilename(initialdir="/", title="Select EKG signal file",
+            self.path = filedialog.askopenfilename(initialdir="./", title="Select EKG signal file",
                                                    filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
             # Activate entry after loading a file
             self.frequency_entry.config(state='normal')
