@@ -72,6 +72,10 @@ class App:
         self.fl_low_status = BooleanVar()
         self.fl_high_entry = None
         self.fl_low_entry = None
+        self.sample_fq_low_entry = None
+        self.sample_fq_high_entry = None
+        self.fl_order_low_entry = None
+        self.fl_order_high_entry = None
 
         # Loading EKG signal from *.txt file
         def loadFile():
@@ -184,9 +188,13 @@ class App:
                                      offvalue=False, state='disabled')
         self.fq_anal_c.grid(row=2, column=0, pady=(20, 20))
 
+        # Type of filter label
+        label_filter = Label(self.frame_right, text="Butterworth's Filter")
+        label_filter.grid(row=3, column=0, pady=(5, 5), padx=15)
+
         # High-Pass filter frame
         hp_filter_frame = Frame(self.frame_right)
-        hp_filter_frame.grid(row=3, column=0, pady=(0, 20), padx=15)
+        hp_filter_frame.grid(row=4, column=0, pady=(0, 20), padx=15)
 
         # High-pass filter
         self.fl_high_c = Checkbutton(hp_filter_frame, text='High-Pass filter', variable=self.fl_high_status, onvalue=True, offvalue=False, state='disabled')
@@ -194,11 +202,19 @@ class App:
         label_high = Label(hp_filter_frame, text="Frequency Limit: ")
         label_high.grid(row=1, column=0)
         self.fl_high_entry = Entry(hp_filter_frame, state='disabled')
-        self.fl_high_entry.grid(row=1, column=1)
+        self.fl_high_entry.grid(row=1, column=1, pady=5)
+        label_sample_high = Label(hp_filter_frame, text="Sampling Frequency: ")
+        label_sample_high.grid(row=2, column=0)
+        self.sample_fq_high_entry = Entry(hp_filter_frame, state='disabled')
+        self.sample_fq_high_entry.grid(row=2, column=1, pady=5)
+        label_order_high = Label(hp_filter_frame, text="Order: ")
+        label_order_high.grid(row=3, column=0)
+        self.fl_order_high_entry = Entry(hp_filter_frame, state='disabled')
+        self.fl_order_high_entry.grid(row=3, column=1, pady=5)
 
         # Low-pass filter frame
         lp_filter_frame = Frame(self.frame_right)
-        lp_filter_frame.grid(row=4, column=0, pady=(0, 20), padx=15)
+        lp_filter_frame.grid(row=5, column=0, pady=(0, 20), padx=15)
 
         # Low-pass filter
         self.fl_low_c = Checkbutton(lp_filter_frame, text='Low-Pass filter', variable=self.fl_low_status,
@@ -208,6 +224,14 @@ class App:
         label_low.grid(row=1, column=0)
         self.fl_low_entry = Entry(lp_filter_frame, state='disabled')
         self.fl_low_entry.grid(row=1, column=1)
+        label_sample_low = Label(lp_filter_frame, text="Sampling Frequency: ")
+        label_sample_low.grid(row=2, column=0)
+        self.sample_fq_low_entry = Entry(lp_filter_frame, state='disabled')
+        self.sample_fq_low_entry.grid(row=2, column=1, pady=5)
+        label_order_low = Label(lp_filter_frame, text="Order: ")
+        label_order_low.grid(row=3, column=0)
+        self.fl_order_low_entry = Entry(lp_filter_frame, state='disabled')
+        self.fl_order_low_entry.grid(row=3, column=1, pady=5)
 
         # Checking inputs and setting buttons accessibility
         def check_entries(*args):
