@@ -48,12 +48,54 @@ class Plot:
         nyquist = 0.5 * fs
         normal_cutoff = cut_off / nyquist
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
+
+        w, h = freqz(b, a, worN=8000)
+        plt.figure()
+        if np.any(h == 0):
+            h[np.where(h == 0)] = 1e-10
+        plt.plot(0.5 * fs * w / np.pi, 20 * np.log10(abs(h)))
+        plt.title("Butterworth Lowpass Filter Frequency Response")
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Gain [dB]')
+        plt.grid()
+
+        file_path = "./butterworth_low_filter_absorption.pdf"
+
+        if file_path:  # If file path is selected
+            try:
+                # Saving selected plot in selected format
+                plt.savefig(file_path)
+                print("Plot saved successfully.")
+            except Exception as e:
+                print("Error while saving plot:", e)
+
         return b, a
 
     def butter_highpass(self, cut_off, fs, order):
         nyquist = 0.5 * fs
         normal_cutoff = cut_off / nyquist
         b, a = butter(order, normal_cutoff, btype='high', analog=False)
+
+        w, h = freqz(b, a, worN=8000)
+        plt.figure()
+        if np.any(h == 0):
+            h[np.where(h == 0)] = 1e-10
+        plt.plot(0.5 * fs * w / np.pi, 20 * np.log10(abs(h)))
+        plt.title("Butterworth Highpass Filter Frequency Response")
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Gain [dB]')
+        plt.grid()
+
+        file_path = "./butterworth_high_filter_absorption.pdf"
+
+        if file_path:  # If file path is selected
+            try:
+                # Saving selected plot in selected format
+                plt.savefig(file_path)
+                print("Plot saved successfully.")
+            except Exception as e:
+                print("Error while saving plot:", e)
+
         return b, a
 
 
