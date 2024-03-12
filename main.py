@@ -69,6 +69,28 @@ class Plot:
             except Exception as e:
                 print("Error while saving plot:", e)
 
+        N = len(app.new_signal)
+        T = 1 / fs
+        frequencies = np.fft.fftfreq(N, T)[:N // 2]
+        fft_values = np.fft.fft(app.new_signal)[:N // 2]
+
+        # Wykres widma
+        plt.plot(frequencies, np.abs(fft_values))
+        plt.title('Signal Spectrum')
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Amplitude')
+        plt.grid()
+
+        file_path = "./butterworth_low_filter_spectrum.pdf"
+
+        if file_path:  # If file path is selected
+            try:
+                # Saving selected plot in selected format
+                plt.savefig(file_path)
+                print("Plot saved successfully.")
+            except Exception as e:
+                print("Error while saving plot:", e)
+
         return b, a
 
     def butter_highpass(self, cut_off, fs, order):
@@ -87,6 +109,28 @@ class Plot:
         plt.grid()
 
         file_path = "./butterworth_high_filter_absorption.pdf"
+
+        if file_path:  # If file path is selected
+            try:
+                # Saving selected plot in selected format
+                plt.savefig(file_path)
+                print("Plot saved successfully.")
+            except Exception as e:
+                print("Error while saving plot:", e)
+
+        N = len(app.new_signal)
+        T = 1 / fs
+        frequencies = np.fft.fftfreq(N, T)[:N // 2]
+        fft_values = np.fft.fft(app.new_signal)[:N // 2]
+
+        # Wykres widma
+        plt.plot(frequencies, np.abs(fft_values))
+        plt.title('Signal Spectrum')
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Amplitude')
+        plt.grid()
+
+        file_path = "./butterworth_high_filter_spectrum.pdf"
 
         if file_path:  # If file path is selected
             try:
