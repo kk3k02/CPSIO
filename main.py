@@ -1,11 +1,12 @@
-import tkinter
-from tkinter import *
-from tkinter import filedialog
+import tkinter as tk
+from tkinter import filedialog, BooleanVar, ttk
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-from readFile import File
+from scipy.signal import butter, filtfilt, freqz
 from scipy.fft import fft
+from readFile import File
 
 
 class Plot:
@@ -43,16 +44,28 @@ class Plot:
         self.plot.set_ylabel("Amplitude")
         self.canvas.draw()
 
+    def butter_lowpass(self, cut_off, fs, order):
+        nyquist = 0.5 * fs
+        normal_cutoff = cut_off / nyquist
+        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        return b, a
+
+    def butter_highpass(self, cut_off, fs, order):
+        nyquist = 0.5 * fs
+        normal_cutoff = cut_off / nyquist
+        b, a = butter(order, normal_cutoff, btype='high', analog=False)
+        return b, a
+
 
 class App:
     def __init__(self, master):
         self.master = master
         self.master.title('CPSIO EKG')
-        self.frame_left = tkinter.Frame(master)
+        self.frame_left = tk.Frame(master)
         self.frame_left.grid(row=0, column=0, pady=20, padx=(20, 0))
-        self.frame_right = tkinter.Frame(master)
+        self.frame_right = tk.Frame(master)
         self.frame_right.grid(row=0, column=2, pady=20, padx=(0, 20))
-        self.frame_middle = tkinter.Frame(master)
+        self.frame_middle = tk.Frame(master)
         self.frame_middle.grid(row=0, column=1, pady=20, padx=(0, 0))
         self.path = ""
         self.frequency_entry = None
@@ -76,6 +89,9 @@ class App:
         self.sample_fq_high_entry = None
         self.fl_order_low_entry = None
         self.fl_order_high_entry = None
+        self.apply_button = None
+        self.base_signal = None
+        self.new_signal = None
 
         # Loading EKG signal from *.txt file
         def loadFile():
@@ -97,14 +113,61 @@ class App:
             label_y = app.label_y_entry.get()
             file = File(app.path, frequency=frequency)
             time, signal_data = file.load_EKG()
+            self.base_signal = signal_data
+
+            if self.new_signal is None:
+                self.new_signal = signal_data
 
             if app.fq_status.get():
                 app.plot_signal.show_frequency_analysis(signal_data, frequency)
             else:
                 app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", label_x, label_y)
 
+            if app.fl_high_status.get():
+                if self.fl_high_entry.get() and self.sample_fq_high_entry.get() and self.fl_order_high_entry.get():
+                    cut_off = float(app.fl_high_entry.get())
+                    fs = float(app.sample_fq_high_entry.get())
+                    order = float(app.fl_order_high_entry.get())
+                    b, a = Plot.butter_highpass(signal_data, cut_off, fs, order)
+                    filtered_signal = filtfilt(b, a, signal_data)
+                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, "EKG SIGNAL", label_x,
+                                                label_y)
+                    self.new_signal = filtered_signal
+
+            if app.fl_low_status.get():
+                if self.fl_low_entry.get() and self.sample_fq_low_entry.get() and self.fl_order_low_entry.get():
+                    cut_off = float(app.fl_low_entry.get())
+                    fs = float(app.sample_fq_low_entry.get())
+                    order = float(app.fl_order_low_entry.get())
+                    b, a = Plot.butter_lowpass(self.new_signal, cut_off, fs, order)
+                    filtered_signal = filtfilt(b, a, self.new_signal)
+                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, "EKG SIGNAL", label_x,
+                                                label_y)
+                    self.new_signal = filtered_signal
+
             app.save_button.config(state='normal')  # Activate save button after showing a plot
-            self.fq_anal_c.config(state='normal')
+            self.fq_anal_c.config(state='normal')  # Activate fq analise button
+            self.fl_high_c.config(state='normal')  # Activate high filter checkButton
+            self.fl_low_c.config(state='normal')  # Activate low filter checkButton
+
+            # Activate entry for filters
+            if self.fl_high_status.get():
+                self.fl_high_entry.config(state='normal')
+                self.sample_fq_high_entry.config(state='normal')
+                self.fl_order_high_entry.config(state='normal')
+            else:
+                self.fl_high_entry.config(state='disabled')
+                self.sample_fq_high_entry.config(state='disabled')
+                self.fl_order_high_entry.config(state='disabled')
+
+            if self.fl_low_status.get():
+                self.fl_low_entry.config(state='normal')
+                self.sample_fq_low_entry.config(state='normal')
+                self.fl_order_low_entry.config(state='normal')
+            else:
+                self.fl_low_entry.config(state='disabled')
+                self.sample_fq_low_entry.config(state='disabled')
+                self.fl_order_low_entry.config(state='disabled')
 
         # Saving plot to file
         def save_plot():
@@ -121,117 +184,122 @@ class App:
                     print("Error while saving plot:", e)
 
         # Load file button
-        loadFile_button = Button(self.frame_left, text="Load File", command=loadFile, bg='red')
+        loadFile_button = tk.Button(self.frame_left, text="Load File", command=loadFile, bg='red')
         loadFile_button.grid(row=0, column=0, pady=20)
 
         # Frequency frame
-        fq_frame = Frame(self.frame_left)
-        fq_frame.grid(row=1 , column=0, pady=20, padx=10)
+        fq_frame = tk.Frame(self.frame_left)
+        fq_frame.grid(row=1, column=0, pady=20, padx=10)
 
         # Frequency label/entry
-        frequency_label = Label(fq_frame, text="Frequency [Hz]:")
+        frequency_label = tk.Label(fq_frame, text="Frequency [Hz]:")
         frequency_label.grid(row=0, column=0)
-        self.frequency_entry = Entry(fq_frame, state='disabled')
+        self.frequency_entry = tk.Entry(fq_frame, state='disabled')
         self.frequency_entry.grid(row=0, column=1)
 
         # Time frame
-        time_frame = Frame(self.frame_left)
+        time_frame = tk.Frame(self.frame_left)
         time_frame.grid(row=2, column=0, pady=20, padx=10)
 
         # Start time label/entry
-        start_time_label = Label(time_frame, text="Start Time [s]:")
+        start_time_label = tk.Label(time_frame, text="Start Time [s]:")
         start_time_label.grid(row=0, column=0)
-        self.start_time_entry = Entry(time_frame, state='disabled')
+        self.start_time_entry = tk.Entry(time_frame, state='disabled')
         self.start_time_entry.grid(row=0, column=1, pady=(0, 5))
 
         # End time label/entry
-        end_time_label = Label(time_frame, text="End Time [s]:")
+        end_time_label = tk.Label(time_frame, text="End Time [s]:")
         end_time_label.grid(row=1, column=0)
-        self.end_time_entry = Entry(time_frame, state='disabled')
+        self.end_time_entry = tk.Entry(time_frame, state='disabled')
         self.end_time_entry.grid(row=1, column=1, pady=(5, 0))
 
         # Save/Show buttons frame
-        ss_button_frame = Frame(self.frame_left)
+        ss_button_frame = tk.Frame(self.frame_left)
         ss_button_frame.grid(row=3, column=0, pady=20, padx=10)
 
         # Save to file button
-        self.save_button = Button(ss_button_frame, text="Save to File", command=save_plot,
-                                  state='disabled')
+        self.save_button = tk.Button(ss_button_frame, text="Save to File", command=save_plot,
+                                     state='disabled')
         self.save_button.grid(row=0, column=0, padx=(0, 10))
 
         # Plot
         self.plot_signal = Plot(self.frame_middle)
 
         # Show EKG button
-        self.showEKG_button = Button(ss_button_frame, text="Show EKG", command=show_plot,
-                                     state='disabled', bg='yellow')
+        self.showEKG_button = tk.Button(ss_button_frame, text="Show EKG", command=show_plot,
+                                        state='disabled', bg='yellow')
         self.showEKG_button.grid(row=0, column=1, padx=(0, 10))
 
         # Plot labels frame
-        plot_label_frame = Frame(self.frame_right)
+        plot_label_frame = tk.Frame(self.frame_right)
         plot_label_frame.grid(row=0, column=0, pady=(60, 0))
 
         # Label/entry X
-        label_x = Label(plot_label_frame, text="Label X:")
+        label_x = tk.Label(plot_label_frame, text="Label X:")
         label_x.grid(row=0, column=0)
-        self.label_x_entry = Entry(plot_label_frame, state='disabled')
+        self.label_x_entry = tk.Entry(plot_label_frame, state='disabled')
         self.label_x_entry.grid(row=0, column=1, pady=(0, 5))
 
         # Label/entry Y
-        label_y = Label(plot_label_frame, text="Label Y:")
-        label_y.grid(row=1, column=0,)
-        self.label_y_entry = Entry(plot_label_frame, state='disabled')
+        label_y = tk.Label(plot_label_frame, text="Label Y:")
+        label_y.grid(row=1, column=0, )
+        self.label_y_entry = tk.Entry(plot_label_frame, state='disabled')
         self.label_y_entry.grid(row=1, column=1, pady=(5, 0))
 
-        # Frequency analise
-        self.fq_anal_c = Checkbutton(self.frame_right, text='Frequency analise', variable=self.fq_status, onvalue=True,
-                                     offvalue=False, state='disabled')
+        # Frequency analysis checkbox
+        self.fq_anal_c = tk.Checkbutton(self.frame_right, text='Frequency analysis', variable=self.fq_status,
+                                        onvalue=True, offvalue=False, state='disabled')
         self.fq_anal_c.grid(row=2, column=0, pady=(20, 20))
 
         # Type of filter label
-        label_filter = Label(self.frame_right, text="Butterworth's Filter")
+        label_filter = tk.Label(self.frame_right, text="Butterworth's Filter")
         label_filter.grid(row=3, column=0, pady=(5, 5), padx=15)
 
         # High-Pass filter frame
-        hp_filter_frame = Frame(self.frame_right)
+        hp_filter_frame = tk.Frame(self.frame_right)
         hp_filter_frame.grid(row=4, column=0, pady=(0, 20), padx=15)
 
         # High-pass filter
-        self.fl_high_c = Checkbutton(hp_filter_frame, text='High-Pass filter', variable=self.fl_high_status, onvalue=True, offvalue=False, state='disabled')
+        self.fl_high_c = tk.Checkbutton(hp_filter_frame, text='High-Pass filter', variable=self.fl_high_status,
+                                        onvalue=True, offvalue=False, state='disabled')
         self.fl_high_c.grid(row=0, column=0)
-        label_high = Label(hp_filter_frame, text="Frequency Limit: ")
+        label_high = tk.Label(hp_filter_frame, text="Frequency Limit: ")
         label_high.grid(row=1, column=0)
-        self.fl_high_entry = Entry(hp_filter_frame, state='disabled')
+        self.fl_high_entry = tk.Entry(hp_filter_frame, state='disabled')
         self.fl_high_entry.grid(row=1, column=1, pady=5)
-        label_sample_high = Label(hp_filter_frame, text="Sampling Frequency: ")
+        label_sample_high = tk.Label(hp_filter_frame, text="Sampling Frequency: ")
         label_sample_high.grid(row=2, column=0)
-        self.sample_fq_high_entry = Entry(hp_filter_frame, state='disabled')
+        self.sample_fq_high_entry = tk.Entry(hp_filter_frame, state='disabled')
         self.sample_fq_high_entry.grid(row=2, column=1, pady=5)
-        label_order_high = Label(hp_filter_frame, text="Order: ")
+        label_order_high = tk.Label(hp_filter_frame, text="Order: ")
         label_order_high.grid(row=3, column=0)
-        self.fl_order_high_entry = Entry(hp_filter_frame, state='disabled')
+        self.fl_order_high_entry = tk.Entry(hp_filter_frame, state='disabled')
         self.fl_order_high_entry.grid(row=3, column=1, pady=5)
 
         # Low-pass filter frame
-        lp_filter_frame = Frame(self.frame_right)
+        lp_filter_frame = tk.Frame(self.frame_right)
         lp_filter_frame.grid(row=5, column=0, pady=(0, 20), padx=15)
 
         # Low-pass filter
-        self.fl_low_c = Checkbutton(lp_filter_frame, text='Low-Pass filter', variable=self.fl_low_status,
-                                     onvalue=True, offvalue=False, state='disabled')
+        self.fl_low_c = tk.Checkbutton(lp_filter_frame, text='Low-Pass filter', variable=self.fl_low_status,
+                                       onvalue=True, offvalue=False, state='disabled')
         self.fl_low_c.grid(row=0, column=0)
-        label_low = Label(lp_filter_frame, text="Frequency Limit: ")
+        label_low = tk.Label(lp_filter_frame, text="Frequency Limit: ")
         label_low.grid(row=1, column=0)
-        self.fl_low_entry = Entry(lp_filter_frame, state='disabled')
+        self.fl_low_entry = tk.Entry(lp_filter_frame, state='disabled')
         self.fl_low_entry.grid(row=1, column=1)
-        label_sample_low = Label(lp_filter_frame, text="Sampling Frequency: ")
+        label_sample_low = tk.Label(lp_filter_frame, text="Sampling Frequency: ")
         label_sample_low.grid(row=2, column=0)
-        self.sample_fq_low_entry = Entry(lp_filter_frame, state='disabled')
+        self.sample_fq_low_entry = tk.Entry(lp_filter_frame, state='disabled')
         self.sample_fq_low_entry.grid(row=2, column=1, pady=5)
-        label_order_low = Label(lp_filter_frame, text="Order: ")
+        label_order_low = tk.Label(lp_filter_frame, text="Order: ")
         label_order_low.grid(row=3, column=0)
-        self.fl_order_low_entry = Entry(lp_filter_frame, state='disabled')
+        self.fl_order_low_entry = tk.Entry(lp_filter_frame, state='disabled')
         self.fl_order_low_entry.grid(row=3, column=1, pady=5)
+
+        # Apply settings button
+        self.apply_button = tk.Button(self.frame_right, text="Apply", state='disabled', command=show_plot)
+        self.apply_button.grid(row=6, column=0, pady=20)
 
         # Checking inputs and setting buttons accessibility
         def check_entries(*args):
@@ -240,12 +308,22 @@ class App:
             else:
                 self.showEKG_button.config(state='disabled')
 
-        for entry in (self.frequency_entry, self.start_time_entry, self.end_time_entry):
+            if any(entry.get() for entry in (
+            self.label_x_entry, self.label_y_entry, self.fl_high_entry, self.fl_low_entry, self.fl_order_high_entry,
+            self.fl_order_low_entry, self.sample_fq_low_entry, self.sample_fq_high_entry)):
+                self.apply_button.config(state='normal')  # Activate apply button
+            else:
+                self.apply_button.config(state='disabled')  # Deactivate apply button
+
+        for entry in (
+        self.frequency_entry, self.start_time_entry, self.end_time_entry, self.label_x_entry, self.label_y_entry,
+        self.fl_high_entry, self.fl_low_entry, self.fl_order_high_entry, self.fl_order_low_entry,
+        self.sample_fq_low_entry, self.sample_fq_high_entry):
             entry.bind('<KeyRelease>', check_entries)
 
 
 if __name__ == '__main__':
-    root = Tk()
+    root = tk.Tk()
     root.geometry("1550x650")
     root.configure(bg='white')
     app = App(root)
