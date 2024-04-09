@@ -19,12 +19,13 @@ class Plot:
         self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=8)
         self.line = None
 
-    def update_Plot(self, time, signal, start_time, end_time, title, xlabel, ylabel):
+    def update_Plot(self, time, signal, start_time, end_time, min_amp, max_amp, title, xlabel, ylabel):
         if self.line:
             self.line.remove()
         self.plot.clear()
         self.plot.plot(time, signal, label="EKG Signal")
         self.plot.set_xlim(start_time, end_time)
+        self.plot.set_ylim(min_amp, max_amp)
         self.plot.set_title(title)
         self.plot.set_xlabel(xlabel)
         self.plot.set_ylabel(ylabel)
@@ -157,6 +158,8 @@ class App:
         self.frequency_entry = None
         self.start_time_entry = None
         self.end_time_entry = None
+        self.min_amp_entry = None
+        self.max_amp_entry = None
         self.showEKG_button = None
         self.save_button = None
         self.label_x = ""
@@ -187,6 +190,8 @@ class App:
             self.frequency_entry.config(state='normal')
             self.start_time_entry.config(state='normal')
             self.end_time_entry.config(state='normal')
+            self.min_amp_entry.config(state='normal')
+            self.max_amp_entry.config(state='normal')
             self.label_x_entry.config(state='normal')
             self.label_y_entry.config(state='normal')
 
@@ -195,6 +200,8 @@ class App:
             frequency = float(app.frequency_entry.get())
             start_time = float(app.start_time_entry.get())
             end_time = float(app.end_time_entry.get())
+            min_amp = float(app.min_amp_entry.get())
+            max_amp = float(app.max_amp_entry.get())
             label_x = app.label_x_entry.get()
             label_y = app.label_y_entry.get()
             file = File(app.path, frequency=frequency)
@@ -207,7 +214,7 @@ class App:
             if app.fq_status.get():
                 app.plot_signal.show_frequency_analysis(signal_data, frequency)
             else:
-                app.plot_signal.update_Plot(time, signal_data, start_time, end_time, "EKG SIGNAL", label_x, label_y)
+                app.plot_signal.update_Plot(time, signal_data, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", label_x, label_y)
 
             if app.fl_high_status.get():
                 if self.fl_high_entry.get() and self.sample_fq_high_entry.get() and self.fl_order_high_entry.get():
@@ -216,7 +223,7 @@ class App:
                     order = float(app.fl_order_high_entry.get())
                     b, a = Plot.butter_highpass(signal_data, cut_off, fs, order)
                     filtered_signal = filtfilt(b, a, signal_data)
-                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, "EKG SIGNAL", label_x,
+                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", label_x,
                                                 label_y)
                     self.new_signal = filtered_signal
 
@@ -227,7 +234,7 @@ class App:
                     order = float(app.fl_order_low_entry.get())
                     b, a = Plot.butter_lowpass(self.new_signal, cut_off, fs, order)
                     filtered_signal = filtfilt(b, a, self.new_signal)
-                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, "EKG SIGNAL", label_x,
+                    app.plot_signal.update_Plot(time, filtered_signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", label_x,
                                                 label_y)
                     self.new_signal = filtered_signal
 
@@ -299,9 +306,25 @@ class App:
         self.end_time_entry = tk.Entry(time_frame, state='disabled')
         self.end_time_entry.grid(row=1, column=1, pady=(5, 0))
 
+        # Amplitude frame
+        amp_frame = tk.Frame(self.frame_left)
+        amp_frame.grid(row=3, column=0, pady=20, padx=10)
+
+        # Min. amplitude label/entry
+        min_amp_label = tk.Label(amp_frame, text="Min. amplitude:")
+        min_amp_label.grid(row=0, column=0)
+        self.min_amp_entry = tk.Entry(amp_frame, state='disabled')
+        self.min_amp_entry.grid(row=0, column=1, pady=(0, 5))
+
+        # Max. amplitude label/entry
+        max_amp_label = tk.Label(amp_frame, text="Max. amplitude:")
+        max_amp_label.grid(row=1, column=0)
+        self.max_amp_entry = tk.Entry(amp_frame, state='disabled')
+        self.max_amp_entry.grid(row=1, column=1, pady=(5, 0))
+
         # Save/Show buttons frame
         ss_button_frame = tk.Frame(self.frame_left)
-        ss_button_frame.grid(row=3, column=0, pady=20, padx=10)
+        ss_button_frame.grid(row=4, column=0, pady=20, padx=10)
 
         # Save to file button
         self.save_button = tk.Button(ss_button_frame, text="Save to File", command=save_plot,
