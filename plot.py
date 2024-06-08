@@ -1,25 +1,115 @@
+"""
+Moduł `Plot` do wizualizacji sygnałów EKG i analizy częstotliwościowej.
+
+Ten moduł zawiera klasę `Plot`, która umożliwia tworzenie, aktualizację i wyświetlanie wykresów sygnałów EKG
+oraz przeprowadzanie analizy częstotliwościowej przy użyciu bibliotek Matplotlib i Scipy.
+
+Klasy:
+--------
+Plot :
+    Klasa odpowiedzialna za tworzenie wykresów, aktualizację danych wykresów oraz analizę częstotliwościową.
+
+Metody:
+-------
+__init__(self, master):
+    Inicjalizuje obiekt `Plot` oraz ustawia elementy interfejsu graficznego do wyświetlania wykresów.
+
+    Parametry:
+    ----------
+    master : Tk
+        Główne okno aplikacji Tkinter.
+
+update_Plot(self, time, signal, start_time, end_time, min_amp, max_amp, title, xlabel, ylabel):
+    Aktualizuje wykres sygnału EKG na podstawie dostarczonych danych.
+
+    Parametry:
+    ----------
+    time : array_like
+        Tablica wartości czasu.
+    signal : array_like
+        Tablica wartości sygnału EKG.
+    start_time : float
+        Czas początkowy wyświetlanego wykresu.
+    end_time : float
+        Czas końcowy wyświetlanego wykresu.
+    min_amp : float
+        Minimalna amplituda wyświetlanego wykresu.
+    max_amp : float
+        Maksymalna amplituda wyświetlanego wykresu.
+    title : str
+        Tytuł wykresu.
+    xlabel : str
+        Etykieta osi X.
+    ylabel : str
+        Etykieta osi Y.
+
+show_frequency_analysis(self, signal, frequency):
+    Wyświetla analizę częstotliwościową sygnału EKG.
+
+    Parametry:
+    ----------
+    signal : array_like
+        Tablica wartości sygnału EKG.
+    frequency : float
+        Częstotliwość próbkowania sygnału.
+
+butter_lowpass(cut_off, fs, order):
+    Statyczna metoda tworząca dolnoprzepustowy filtr Butterwortha.
+
+    Parametry:
+    ----------
+    cut_off : float
+        Częstotliwość odcięcia filtru.
+    fs : float
+        Częstotliwość próbkowania sygnału.
+    order : int
+        Rząd filtru.
+
+    Zwraca:
+    -------
+    b : ndarray
+        Współczynniki filtru (b).
+    a : ndarray
+        Współczynniki filtru (a).
+
+butter_highpass(cut_off, fs, order):
+    Statyczna metoda tworząca górnoprzepustowy filtr Butterwortha.
+
+    Parametry:
+    ----------
+    cut_off : float
+        Częstotliwość odcięcia filtru.
+    fs : float
+        Częstotliwość próbkowania sygnału.
+    order : int
+        Rząd filtru.
+
+    Zwraca:
+    -------
+    b : ndarray
+        Współczynniki filtru (b).
+    a : ndarray
+        Współczynniki filtru (a).
+"""
+
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from scipy.fft import fft
 from scipy.signal import butter
 
+
 class Plot:
-    def __init__(self, master, app):
-        self.app = app
+    def __init__(self, master):
         self.master = master
         self.fig = Figure(figsize=(10, 6), dpi=100)
         self.plot = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=8)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=12)
         self.line = None
 
     def update_Plot(self, time, signal, start_time, end_time, min_amp, max_amp, title, xlabel, ylabel):
-        """
-        Update the plot with the given parameters.
-        Clears the previous plot, sets new limits, and draws the updated plot.
-        """
         if self.line:
             self.line.remove()
         self.plot.clear()
@@ -34,9 +124,6 @@ class Plot:
         self.line = self.plot.lines[0]
 
     def show_frequency_analysis(self, signal, frequency):
-        """
-        Perform and display frequency analysis of the given signal.
-        """
         self.plot.clear()
         N = len(signal)
         T = 1 / frequency
