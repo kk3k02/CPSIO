@@ -2,24 +2,20 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from scipy.fft import fft
-from scipy.signal import butter
+from scipy.signal import butter, filtfilt
+
 
 class Plot:
-    def __init__(self, master, app):
-        self.app = app
+    def __init__(self, master):
         self.master = master
         self.fig = Figure(figsize=(10, 6), dpi=100)
         self.plot = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=8)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=12)
         self.line = None
 
     def update_Plot(self, time, signal, start_time, end_time, min_amp, max_amp, title, xlabel, ylabel):
-        """
-        Update the plot with the given parameters.
-        Clears the previous plot, sets new limits, and draws the updated plot.
-        """
         if self.line:
             self.line.remove()
         self.plot.clear()
@@ -34,9 +30,6 @@ class Plot:
         self.line = self.plot.lines[0]
 
     def show_frequency_analysis(self, signal, frequency):
-        """
-        Perform and display frequency analysis of the given signal.
-        """
         self.plot.clear()
         N = len(signal)
         T = 1 / frequency
