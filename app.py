@@ -1,3 +1,177 @@
+"""
+Moduł aplikacji do analizy sygnałów EKG z interfejsem graficznym w Tkinter.
+
+Ten moduł zawiera klasę `App`, która implementuje aplikację do wczytywania, przetwarzania
+i wizualizacji sygnałów EKG. Aplikacja umożliwia użytkownikowi wczytanie sygnału z pliku,
+wyświetlenie wykresu sygnału EKG, zastosowanie filtrów wysokoprzepustowych i niskoprzepustowych,
+przeprowadzenie analizy FFT oraz zapisanie wykresu do pliku.
+
+Klasy:
+--------
+App :
+    Główna klasa aplikacji, zawierająca metody do obsługi GUI oraz przetwarzania sygnałów.
+
+Zmienne klasowe:
+----------------
+time : float
+    Czas sygnału EKG.
+signal : ndarray
+    Tablica wartości sygnału EKG.
+length : int
+    Długość sygnału EKG.
+
+Metody:
+-------
+__init__(self, master):
+    Inicjalizuje główne okno aplikacji oraz elementy interfejsu użytkownika.
+
+    Parametry:
+    ----------
+    master : Tk
+        Główne okno aplikacji Tkinter.
+
+loadFile():
+    Wczytuje plik z sygnałem EKG i aktywuje odpowiednie pola wejściowe.
+    Nie przyjmuje żadnych parametrów ani nie zwraca wartości.
+
+show_plot():
+    Wyświetla wykres sygnału EKG na podstawie wczytanych danych oraz ustawień użytkownika.
+
+    Parametry:
+    ----------
+    frequency : float
+        Częstotliwość próbkowania sygnału EKG.
+    start_time : float
+        Czas początkowy wyświetlanego wykresu.
+    end_time : float
+        Czas końcowy wyświetlanego wykresu.
+    min_amp : float
+        Minimalna amplituda wyświetlanego wykresu.
+    max_amp : float
+        Maksymalna amplituda wyświetlanego wykresu.
+    lab_x : str
+        Etykieta osi X.
+    lab_y : str
+        Etykieta osi Y.
+
+show_sin_plot():
+    Generuje i wyświetla wykres sinusoidy o zadanych parametrach.
+
+    Parametry:
+    ----------
+    start_time : float
+        Czas początkowy wyświetlanego wykresu.
+    end_time : float
+        Czas końcowy wyświetlanego wykresu.
+    min_amp : float
+        Minimalna amplituda sygnału.
+    max_amp : float
+        Maksymalna amplituda sygnału.
+
+show_2sin_plot():
+    Generuje i wyświetla wykres sumy dwóch sinusoid o różnych częstotliwościach.
+
+    Parametry:
+    ----------
+    start_time : float
+        Czas początkowy wyświetlanego wykresu.
+    end_time : float
+        Czas końcowy wyświetlanego wykresu.
+    min_amp : float
+        Minimalna amplituda sygnału.
+    max_amp : float
+        Maksymalna amplituda sygnału.
+
+do_fft():
+    Przeprowadza analizę FFT na wczytanym sygnale EKG i wyświetla widmo amplitudowe.
+    Nie przyjmuje żadnych parametrów ani nie zwraca wartości.
+
+do_ifft():
+    Przeprowadza odwrotną transformację FFT na wczytanym sygnale EKG i wyświetla przetworzony sygnał.
+
+    Parametry:
+    ----------
+    start_time : float
+        Czas początkowy wyświetlanego wykresu.
+    end_time : float
+        Czas końcowy wyświetlanego wykresu.
+
+save_plot():
+    Zapisuje aktualnie wyświetlany wykres do pliku w formacie PNG, JPEG lub PDF.
+    Nie przyjmuje żadnych parametrów ani nie zwraca wartości.
+
+check_entries():
+    Sprawdza, czy wszystkie wymagane pola wejściowe zostały wypełnione i odpowiednio aktywuje przyciski.
+    Nie przyjmuje żadnych parametrów ani nie zwraca wartości.
+
+Zmienne instancyjne:
+--------------------
+master : Tk
+    Główne okno aplikacji Tkinter.
+path : str
+    Ścieżka do pliku z sygnałem EKG.
+frequency_entry : Entry
+    Pole wejściowe dla częstotliwości próbkowania.
+start_time_entry : Entry
+    Pole wejściowe dla czasu początkowego wykresu.
+end_time_entry : Entry
+    Pole wejściowe dla czasu końcowego wykresu.
+min_amp_entry : Entry
+    Pole wejściowe dla minimalnej amplitudy wykresu.
+max_amp_entry : Entry
+    Pole wejściowe dla maksymalnej amplitudy wykresu.
+showEKG_button : Button
+    Przycisk do wyświetlania wykresu sygnału EKG.
+showSin_button : Button
+    Przycisk do wyświetlania wykresu sinusoidy.
+show2Sin_button : Button
+    Przycisk do wyświetlania wykresu sumy dwóch sinusoid.
+fft_button : Button
+    Przycisk do przeprowadzania analizy FFT.
+ifft_button : Button
+    Przycisk do przeprowadzania odwrotnej transformacji FFT.
+save_button : Button
+    Przycisk do zapisywania wykresu do pliku.
+label_x : str
+    Etykieta osi X wykresu.
+label_y : str
+    Etykieta osi Y wykresu.
+label_x_entry : Entry
+    Pole wejściowe dla etykiety osi X.
+label_y_entry : Entry
+    Pole wejściowe dla etykiety osi Y.
+fq_status : BooleanVar
+    Zmienna określająca status checkboxu analizy częstotliwościowej.
+fq_anal_c : Checkbutton
+    Checkbox do wyboru analizy częstotliwościowej.
+fl_high_c : Checkbutton
+    Checkbox do wyboru filtra wysokoprzepustowego.
+fl_low_c : Checkbutton
+    Checkbox do wyboru filtra niskoprzepustowego.
+fl_high_status : BooleanVar
+    Zmienna określająca status checkboxu filtra wysokoprzepustowego.
+fl_low_status : BooleanVar
+    Zmienna określająca status checkboxu filtra niskoprzepustowego.
+fl_high_entry : Entry
+    Pole wejściowe dla częstotliwości odcięcia filtra wysokoprzepustowego.
+fl_low_entry : Entry
+    Pole wejściowe dla częstotliwości odcięcia filtra niskoprzepustowego.
+sample_fq_low_entry : Entry
+    Pole wejściowe dla częstotliwości próbkowania sygnału dla filtra niskoprzepustowego.
+sample_fq_high_entry : Entry
+    Pole wejściowe dla częstotliwości próbkowania sygnału dla filtra wysokoprzepustowego.
+fl_order_low_entry : Entry
+    Pole wejściowe dla rzędu filtra niskoprzepustowego.
+fl_order_high_entry : Entry
+    Pole wejściowe dla rzędu filtra wysokoprzepustowego.
+apply_button : Button
+    Przycisk do zastosowania ustawień i wyświetlenia wykresu.
+base_signal : ndarray
+    Tablica wartości pierwotnego sygnału EKG.
+new_signal : ndarray
+    Tablica wartości przetworzonego sygnału EKG.
+"""
+
 import tkinter as tk
 from tkinter import filedialog, BooleanVar
 import numpy as np
@@ -74,7 +248,8 @@ class App:
             if self.fq_status.get():
                 self.plot_signal.show_frequency_analysis(App.signal, frequency)
             else:
-                self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", lab_x, lab_y)
+                self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL",
+                                             lab_x, lab_y)
 
             if self.fl_high_status.get():
                 if self.fl_high_entry.get() and self.sample_fq_high_entry.get() and self.fl_order_high_entry.get():
@@ -83,7 +258,8 @@ class App:
                     order = float(self.fl_order_high_entry.get())
                     b, a = self.plot_signal.butter_highpass(cut_off, fs, order)
                     filtered_signal = filtfilt(b, a, App.signal)
-                    self.plot_signal.update_Plot(App.time, filtered_signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", lab_x, lab_y)
+                    self.plot_signal.update_Plot(App.time, filtered_signal, start_time, end_time, min_amp, max_amp,
+                                                 "EKG SIGNAL", lab_x, lab_y)
                     self.new_signal = filtered_signal
 
             if self.fl_low_status.get():
@@ -93,7 +269,8 @@ class App:
                     order = float(self.fl_order_low_entry.get())
                     b, a = self.plot_signal.butter_lowpass(cut_off, fs, order)
                     filtered_signal = filtfilt(b, a, self.new_signal)
-                    self.plot_signal.update_Plot(App.time, filtered_signal, start_time, end_time, min_amp, max_amp, "EKG SIGNAL", lab_x, lab_y)
+                    self.plot_signal.update_Plot(App.time, filtered_signal, start_time, end_time, min_amp, max_amp,
+                                                 "EKG SIGNAL", lab_x, lab_y)
                     self.new_signal = filtered_signal
 
             self.save_button.config(state='normal')  # Activate save button after showing a plot
@@ -138,7 +315,8 @@ class App:
             # Generate sine wave
             App.signal = np.sin(2 * np.pi * frequency * App.time)
 
-            self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "SIN SIGNAL", self.label_x, self.label_y)
+            self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "SIN SIGNAL",
+                                         self.label_x, self.label_y)
 
         def show_2sin_plot():
             start_time = 0
@@ -163,7 +341,8 @@ class App:
             # Mix the sine waves
             App.signal = sine_wave1 + sine_wave2
 
-            self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "SIN SIGNAL", self.label_x, self.label_y)
+            self.plot_signal.update_Plot(App.time, App.signal, start_time, end_time, min_amp, max_amp, "SIN SIGNAL",
+                                         self.label_x, self.label_y)
 
         def do_fft():
             # Calculate the discrete Fourier transform
@@ -192,16 +371,8 @@ class App:
             # Calculate the discrete Fourier transform
             Fft = fft(App.signal)
             # Calculate the amplitude spectrum
-            spectrum = np.abs(Fft)
-
-            duration = 10  # duration of the signal
-            sampling_interval = duration / App.length
 
             # Determine the frequency axis
-            frequencies = fftfreq(App.length, sampling_interval)
-            indices = np.where(frequencies >= 0)
-            frequencies = frequencies[indices]
-            spectrum = spectrum[indices]
 
             inverse_fft = ifft(Fft)
 
@@ -269,7 +440,8 @@ class App:
         self.save_button.grid(row=11, column=0, padx=5, pady=5)
 
         # Show EKG button
-        self.showEKG_button = tk.Button(self.frame_left, text="Show EKG", command=show_plot, state='normal', bg='yellow')
+        self.showEKG_button = tk.Button(self.frame_left, text="Show EKG", command=show_plot, state='normal',
+                                        bg='yellow')
         self.showEKG_button.grid(row=12, column=0, padx=5, pady=5)
 
         # Middle frame for plot
@@ -284,11 +456,13 @@ class App:
         self.frame_bottom.grid(row=1, column=1, columnspan=2, padx=0, pady=0, sticky='')
 
         # Show Sin button
-        self.showSin_button = tk.Button(self.frame_bottom, text="Load Sin", command=show_sin_plot, state='normal', bg='red')
+        self.showSin_button = tk.Button(self.frame_bottom, text="Load Sin", command=show_sin_plot, state='normal',
+                                        bg='red')
         self.showSin_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Show 2Sin button
-        self.show2Sin_button = tk.Button(self.frame_bottom, text="Load 2 Sin", command=show_2sin_plot, state='normal', bg='red')
+        self.show2Sin_button = tk.Button(self.frame_bottom, text="Load 2 Sin", command=show_2sin_plot, state='normal',
+                                         bg='red')
         self.show2Sin_button.grid(row=0, column=1, padx=5, pady=5)
 
         # FFT button
@@ -316,11 +490,13 @@ class App:
         self.frame_right.grid(row=0, column=2, padx=0, pady=10, sticky='n')
 
         # Frequency analysis checkbox
-        self.fq_anal_c = tk.Checkbutton(self.frame_right, text='Frequency analysis', variable=self.fq_status, onvalue=True, offvalue=False, state='disabled')
+        self.fq_anal_c = tk.Checkbutton(self.frame_right, text='Frequency analysis', variable=self.fq_status,
+                                        onvalue=True, offvalue=False, state='disabled')
         self.fq_anal_c.grid(row=0, column=0, padx=5, pady=5)
 
         # High-pass filter checkbox
-        self.fl_high_c = tk.Checkbutton(self.frame_right, text='High-Pass Filter', variable=self.fl_high_status, onvalue=True, offvalue=False, state='disabled')
+        self.fl_high_c = tk.Checkbutton(self.frame_right, text='High-Pass Filter', variable=self.fl_high_status,
+                                        onvalue=True, offvalue=False, state='disabled')
         self.fl_high_c.grid(row=1, column=0, padx=5, pady=5)
 
         label_high = tk.Label(self.frame_right, text="Cut-off Frequency: ")
@@ -339,7 +515,8 @@ class App:
         self.fl_order_high_entry.grid(row=7, column=0, pady=5)
 
         # Low-pass filter checkbox
-        self.fl_low_c = tk.Checkbutton(self.frame_right, text='Low-Pass Filter', variable=self.fl_low_status, onvalue=True, offvalue=False, state='disabled')
+        self.fl_low_c = tk.Checkbutton(self.frame_right, text='Low-Pass Filter', variable=self.fl_low_status,
+                                       onvalue=True, offvalue=False, state='disabled')
         self.fl_low_c.grid(row=8, column=0, padx=5, pady=5)
 
         label_low = tk.Label(self.frame_right, text="Cut-off Frequency: ")
@@ -362,7 +539,7 @@ class App:
         self.apply_button.grid(row=15, column=0, pady=20)
 
         # Checking inputs and setting buttons accessibility
-        def check_entries(*args):
+        def check_entries():
             if all(e.get() for e in (self.frequency_entry, self.start_time_entry, self.end_time_entry)):
                 self.showEKG_button.config(state='normal')
             else:
@@ -379,4 +556,3 @@ class App:
                       self.label_y_entry, self.fl_high_entry, self.fl_low_entry, self.fl_order_high_entry,
                       self.fl_order_low_entry, self.sample_fq_low_entry, self.sample_fq_high_entry):
             entry.bind('<KeyRelease>', check_entries)
-
