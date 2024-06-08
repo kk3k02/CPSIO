@@ -15,6 +15,18 @@ class Plot:
         self.line = None
 
     def update_Plot(self, time, signal, start_time, end_time, title, xlabel, ylabel):
+        """
+        Update the plot with the given time, signal data, and plot parameters.
+        Clears the previous plot, sets new limits, and draws the updated plot.
+
+        :param time: Time data for the x-axis
+        :param signal: Signal data for the y-axis
+        :param start_time: Starting time for the plot x-axis limit
+        :param end_time: Ending time for the plot x-axis limit
+        :param title: Title of the plot
+        :param xlabel: Label for the x-axis
+        :param ylabel: Label for the y-axis
+        """
         if self.line:
             self.line.remove()
         self.plot.clear()
@@ -28,6 +40,12 @@ class Plot:
         self.line = self.plot.lines[0]
 
     def show_frequency_analysis(self, signal, frequency):
+        """
+        Perform and display frequency analysis of the given signal.
+
+        :param signal: Signal data to analyze
+        :param frequency: Sampling frequency of the signal
+        """
         self.plot.clear()
         N = len(signal)
         T = 1 / frequency
