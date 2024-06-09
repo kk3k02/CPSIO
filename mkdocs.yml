@@ -43,8 +43,8 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
 nav:
   - Strona główna: /
-  - Działanie kodu: /Działanie kodu
-  - Ćwiczenie 1: /Ćwiczenie 1
-  - Ćwiczenie 2: /Ćwiczenie 2
-  - Ćwiczenie 3: /Ćwiczenie 3
-  - Ćwiczenie 4: /Ćwiczenie 4
+  - Działanie kodu: /Działanie kodu/
+  - Ćwiczenie 1: /Ćwiczenie 1/
+  - Ćwiczenie 2: /Ćwiczenie 2/
+  - Ćwiczenie 3: /Ćwiczenie 3/
+  - Ćwiczenie 4: /Ćwiczenie 4/
