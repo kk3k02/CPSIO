@@ -41,4 +41,47 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
-repo_url: https://github.com/kk3k02/CPSIO
+
+nav:
+  - Home: index.md
+  - Example 1: ex_1.md
+  - Example 2: ex_2.md
+  - Example 3: ex_3.md
+  - Example 4: ex_4.md
+  - Read File: readFile.md
+  - Show Plot: showPlot.md
+  - Zadanie 1:
+      - AMP Spec: "Zadanie 1/amp_spec.md"
+      - AMP Spec 2: "Zadanie 1/amp_spec2.md"
+      - Bottom Panel: "Zadanie 1/bottom_panel.md"
+      - Example Data: "Zadanie 1/example_data.md"
+      - Example Filter: "Zadanie 1/example_filter.md"
+      - Left Panel: "Zadanie 1/left_panel.md"
+      - Load Signal: "Zadanie 1/load_signal.md"
+      - Middle Panel: "Zadanie 1/middle_panel.md"
+      - Right Panel: "Zadanie 1/right_panel.md"
+      - Save: "Zadanie 1/save.md"
+      - Signal Arg: "Zadanie 1/signal_arg.md"
+      - Sin Rev: "Zadanie 1/sin_rev.md"
+      - Start App: "Zadanie 1/start_app.md"
+  - Zadanie 2:
+      - Ex 2.1: "Zadanie 2/ex_2_1.md"
+      - Ex 2.2: "Zadanie 2/ex_2_2.md"
+      - Ex 2.3: "Zadanie 2/ex_2_3.md"
+      - Ex 2.4: "Zadanie 2/ex_2_4.md"
+      - Ex 2.5: "Zadanie 2/ex_2_5.md"
+      - Ex 2.6: "Zadanie 2/ex_2_6.md"
+  - Zadanie 3:
+      - Ex 3.1: "Zadanie 3/ex_3_1.md"
+      - Ex 3.2: "Zadanie 3/ex_3_2.md"
+      - Ex 3.3: "Zadanie 3/ex_3_3.md"
+      - Ex 3.4: "Zadanie 3/ex_3_4.md"
+  - Zadanie 4:
+      - Ex 4.1: "Zadanie 4/ex_4_1.md"
+      - Ex 4.2: "Zadanie 4/ex_4_2.md"
+      - Ex 4.3: "Zadanie 4/ex_4_3.md"
+      - Ex 4.4: "Zadanie 4/ex_4_4.md"
+      - Ex 4.5: "Zadanie 4/ex_4_5.md"
+      - Ex 4.6: "Zadanie 4/ex_4_6.md"
+      - Ex 4.7: "Zadanie 4/ex_4_7.md"
+      - Ex 4.8: "Zadanie 4/ex_4_8.md"
